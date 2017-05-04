@@ -43,7 +43,7 @@ RUN useradd -Um -s /bin/zsh craig
 # Zsh
 USER root
 WORKDIR /home/craig
-COPY ../.zshrc .zshrc
+COPY .zshrc .zshrc
 RUN chown craig:craig .zshrc
 RUN chsh -s /bin/zsh craig
 
@@ -51,8 +51,8 @@ RUN chsh -s /bin/zsh craig
 # Vim
 USER root
 WORKDIR /home/craig
-COPY ../.vimrc .vimrc
-COPY ../solarized.vim .vim/colors/
+COPY .vimrc .vimrc
+COPY solarized.vim .vim/colors/
 RUN mkdir -p .vim/autoload .vim/bundle
 RUN curl -LSso .vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 RUN git clone https://github.com/rking/ag.vim .vim/bundle/ag
