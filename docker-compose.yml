@@ -1,0 +1,11 @@
+version: '3'
+services:
+  client:
+    build: ./client/
+    ports:
+      - "8080:8080"
+  server:
+    build: ./server/
+    ports:
+      - "8085:8085"
+    #command: ./node_modules/.bin/webpack-dev-server --host 0.0.0.0 --port 8080
