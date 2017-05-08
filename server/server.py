@@ -2,6 +2,7 @@
 
 import socket
 import threading
+from sockets.tests.testing_config import messages as test_messages
 import time
 import random
 import math
@@ -12,13 +13,13 @@ def should_send_many():
     else:
         return False
 
-def get_ship_message():
+def get_random_ship_message():
     id_part=int(math.floor(random.random()*100000))
     width=30
     height=50
     return '^{}|{}|{}^'.format(id_part,width,height)
 
-class ThreadedServer(object):
+class RandomTCPThreadedServer(object):
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -42,7 +43,7 @@ class ThreadedServer(object):
                     # Set the response to echo back the recieved data
                     print("connection from: ", address)
                     while True:
-                        response=get_ship_message()
+                        response=get_random_ship_message()
                         if should_send_many():
                             for i in range(3):
                                 client.send(response)
@@ -50,6 +51,39 @@ class ThreadedServer(object):
                         else:
                             client.send(response)
                             time.sleep(2)
+                else:
+                    raise Exception('Client disconnected')
+            except:
+                client.close()
+                return False
+
+class TestingTCPThreadedServer(RandomTCPThreadedServer):
+
+    def __init__(self, host, port, messages, load):
+        super(TestingTCPThreadedServer, self).__init__(host, port)
+        self.messages = messages
+        self.load = load
+
+    def listen(self):
+        self.sock.listen(5)
+        while True:
+            client, address = self.sock.accept()
+            client.settimeout(60)
+            threading.Thread(target = self.listenToClient,args = (client,address)).start()
+
+    def listenToClient(self, client, address):
+        size = 1024
+        while True:
+            try:
+                data = client.recv(size)
+                if data:
+                    print("connection from: ", address)
+                    while True:
+                        if not self.messages:
+                            break
+                        client.send(self.messages.pop(0))
+                        print("hello")
+                        time.sleep(1/self.load)
                 else:
                     raise Exception('Client disconnected')
             except:
@@ -65,5 +99,6 @@ if __name__ == "__main__":
             break
         except ValueError:
             pass
-
-    ThreadedServer('',port_num).listen()
+    # RandomTCPThreadedServer('', port_num).listen()
+    print("running Testing TCP Threaded Server")
+    TestingTCPThreadedServer('',port_num, test_messages, 2).listen()
