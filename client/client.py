@@ -33,9 +33,11 @@ class SickClient:
         self.s.send(MESSAGE)
 
     def start_comms(self):
+        print("heree")
         while not self.exit:
             data = self.s.recv(self.BUFFER_SIZE)
             print("received response: {}".format(data))
+            time.sleep(4)
             # messages=parse_message(data)
             #format data
             #check key
