@@ -10,12 +10,18 @@ def split_multiple_messages(data):
     messages = filter(None, messages)
     return messages
 
+def determine_message_is_ping(message):
+    return message=="ping"
+
 def parse_message(data):
     message = data.split("|")
-    slabel = int(message[0])
+    slabel = message[0]
     height = int(message[1])
     width = int(message[2])
     return {'slabel': slabel, 'height': height, 'width': width}
+
+def do_something(message):
+    print("sending message through {}".format(message))
 
 class SickClient:
 
@@ -32,17 +38,32 @@ class SickClient:
         self.s.connect((TCP_IP, TCP_PORT))
         self.s.send(MESSAGE)
 
+    def update_wms(self, message):
+        #will get decorator for cache key checking
+        if not self.mc.get(message['slabel']):
+            self.mc.set(message['slabel'], 'processed')
+            do_something(message)
+
     def start_comms(self):
-        print("heree")
         while not self.exit:
             data = self.s.recv(self.BUFFER_SIZE)
-            print("received response: {}".format(data))
-            time.sleep(4)
+            if data:
+                print("received comms: {}".format(data))
+                import pdb
+                pdb.set_trace()
+
+                messages = split_multiple_messages(data)
+                final = map(self.update_wms, map(parse_message, messages))
+                print(final)
+                # split_multiple_messages
+                # parse_message
+                # update_wms()
+            else:
+                self.kill()
             # messages=parse_message(data)
             #format data
             #check key
             #set key
-            self.mc.set("some_key", "Some value")
 
     def kill(self):
         self.exit = True

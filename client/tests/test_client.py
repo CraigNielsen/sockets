@@ -31,7 +31,7 @@ class TestSickClient(TestCase):
     def test_parse_single_message(self):
         messages = split_multiple_messages(self.many_messages)
         message = parse_message(messages[0])
-        expecting = {'slabel': 41822, 'height': 30, 'width': 50}
+        expecting = {'slabel': '41822', 'height': 30, 'width': 50}
         self.assertEqual(message, expecting)
 
     # def test_server_test(self):
@@ -42,11 +42,13 @@ class TestSickClient(TestCase):
     #handle mutliple clients
     #ensure mocked function not called many times(after check for key in memcache)
     # def test_client_doesnt_make_multiple_calls_for_same_slable(self):
+
     def test_sick_client_setup(self):
-        import pdb
-        pdb.set_trace()
         sc = SickClient()
+        # sc2 = SickClient()
         sc.connect()
+        # sc2.connect()
         sc.start_comms()
+        # sc2.start_comms()
 
 

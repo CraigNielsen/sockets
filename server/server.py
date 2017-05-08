@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import socket
+import sys
 import threading
 from sockets.tests.testing_config import messages as test_messages
 import time
@@ -80,9 +81,10 @@ class TestingTCPThreadedServer(RandomTCPThreadedServer):
                     print("connection from: ", address)
                     while True:
                         if not self.messages:
-                            break
-                        client.send(self.messages.pop(0))
-                        print("hello")
+                            sys.exit()
+                        message=self.messages.pop(0)
+                        print("about to send, {}".format(message))
+                        client.send(message)
                         time.sleep(1/self.load)
                 else:
                     raise Exception('Client disconnected')
