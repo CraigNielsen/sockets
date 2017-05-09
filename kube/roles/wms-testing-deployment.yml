@@ -1,0 +1,25 @@
+kind: Deployment
+apiVersion: extensions/v1
+metadata:
+  name: wms-testing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: wms-testing-service
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: sick-server
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5005
+              protocol: TCP
+          env:
+            - name: ROLE
+              value: TESTING
+            - name: PYTHONPATH
+              value: /usr/local/tal/tal/:/usr/local/tal/tal/tal/services/dashboard
+          command:
+          - python -m sockets.server.server

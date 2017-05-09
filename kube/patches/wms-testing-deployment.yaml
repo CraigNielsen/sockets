@@ -1,0 +1,19 @@
+kind: Deployment
+apiVersion: extensions/v1
+metadata:
+  name: wms-testing-service
+spec:
+  template:
+    spec:
+      volumes:
+        - name: wms-testing-service
+          hostPath:
+            path: $BASE_PATH/tal
+      containers:
+        - name: sick-server
+          env:
+            - name: CODE_RELOAD
+              value: RELOAD
+          volumeMounts:
+            - mountPath: /usr/local/tal/tal
+              name: sick-server-service

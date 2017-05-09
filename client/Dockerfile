@@ -27,7 +27,8 @@ RUN apt-get update && apt-get install -y  \
   vim \
   wget \
   zsh \
-  nodejs \
+  python \
+  python-pip \
   build-essential
 # install from nodesource using apt-get
 # https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
@@ -60,15 +61,13 @@ RUN chown -R craig:craig .vim
 
 
 # Pyenv
-# TODO: Checkout specific releases.
-RUN curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
-USER root
-RUN bash nodesource_setup.sh
-RUN apt-get install nodejs
-RUN npm install -g npm
+COPY requirements.txt sockets/requirements.txt
+RUN pip install -r sockets/requirements.txt
 
 WORKDIR /client
+COPY tests/ tests/
+CMD ls
 COPY client.py client.py
 
-CMD python client.py
-#CMD ./node_modules/.bin/webpack-dev-server -p --config ./webpack.production.config.js --host 0.0.0.0 --port 8080
+#CMD ls -R
+CMD pytest

@@ -3,7 +3,6 @@
 import socket
 import sys
 import threading
-from sockets.tests.testing_config import messages as test_messages
 import time
 import random
 import math
@@ -51,7 +50,7 @@ class RandomTCPThreadedServer(object):
                                 time.sleep(0.5)
                         else:
                             client.send(response)
-                            time.sleep(2)
+                            time.sleep(1)
                 else:
                     raise Exception('Client disconnected')
             except:
@@ -92,15 +91,3 @@ class TestingTCPThreadedServer(RandomTCPThreadedServer):
                 client.close()
                 return False
 
-if __name__ == "__main__":
-    while True:
-        port_num = 5005
-        # port_num = input("Port? ")
-        try:
-            port_num = int(port_num)
-            break
-        except ValueError:
-            pass
-    # RandomTCPThreadedServer('', port_num).listen()
-    print("running Testing TCP Threaded Server")
-    TestingTCPThreadedServer('',port_num, test_messages, 2).listen()

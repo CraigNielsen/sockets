@@ -2,7 +2,7 @@ import unittest
 from unittest import TestCase
 import time
 import threading
-from ..client import parse_message, split_multiple_messages, SickClient
+from client import parse_message, split_multiple_messages, SickClient
 # from sockets.server.server import TestingTCPThreadedServer
 
 # These tests are all the same.

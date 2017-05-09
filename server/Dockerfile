@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:jessie-slim
 
 
 # Use fast mirrors
@@ -68,7 +68,7 @@ RUN apt-get install nodejs
 RUN npm install -g npm
 
 WORKDIR /server
+COPY testing_config.py testing_config.py
 COPY server.py server.py
-
-CMD python server.py
-#CMD ./node_modules/.bin/webpack-dev-server -p --config ./webpack.production.config.js --host 0.0.0.0 --port 8080
+COPY runserver.py runserver.py
+CMD python runserver.py

@@ -4,10 +4,14 @@ services:
     build: ./client/
     ports:
       - "8080:8080"
+    stdin_open: true
+    tty: true
   server:
     build: ./server/
     ports:
-      - "8085:8085"
+      - "5005:5005"
+    stdin_open: true
+    tty: true
   memcached:
     image: memcached
     ports:

@@ -43,18 +43,19 @@ class SickClient:
         if not self.mc.get(message['slabel']):
             self.mc.set(message['slabel'], 'processed')
             do_something(message)
+        else:
+            print("doubled slabel message {}".format(message['slabel']))
 
     def start_comms(self):
         while not self.exit:
             data = self.s.recv(self.BUFFER_SIZE)
             if data:
+                time.sleep(2)
                 print("received comms: {}".format(data))
-                import pdb
-                pdb.set_trace()
 
                 messages = split_multiple_messages(data)
-                final = map(self.update_wms, map(parse_message, messages))
-                print(final)
+                al = map(parse_message, messages)
+                map(self.update_wms, map(parse_message, messages))
                 # split_multiple_messages
                 # parse_message
                 # update_wms()
