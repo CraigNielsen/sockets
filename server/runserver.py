@@ -11,5 +11,5 @@ if __name__ == "__main__":
         except ValueError:
             pass
     print("running Random Threaded Server")
-    RandomTCPThreadedServer('', port_num).listen()
-    # TestingTCPThreadedServer('',port_num, test_messages, 2).listen()
+    # RandomTCPThreadedServer('', port_num).listen()
+    TestingTCPThreadedServer('',port_num, test_messages, 2).listen()

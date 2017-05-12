@@ -7,6 +7,10 @@ import time
 import random
 import math
 
+# NOTE: No need to import client values(this is used for testing only)
+PING='ping'
+CLOSE='close'
+
 def should_send_many():
     if random.random() > 0.2:
         return True
@@ -17,6 +21,8 @@ def get_random_ship_message():
     id_part=int(math.floor(random.random()*100000))
     width=30
     height=50
+    if should_send_many():
+        return '^{}^'.format(CLOSE)
     return '^{}|{}|{}^'.format(id_part,width,height)
 
 class RandomTCPThreadedServer(object):
@@ -80,6 +86,8 @@ class TestingTCPThreadedServer(RandomTCPThreadedServer):
                     print("connection from: ", address)
                     while True:
                         if not self.messages:
+                            client.send('^close^')
+                            #TODO: exit elegantly
                             sys.exit()
                         message=self.messages.pop(0)
                         print("about to send, {}".format(message))

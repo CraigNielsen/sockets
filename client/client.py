@@ -4,17 +4,30 @@ import socket
 import time
 import memcache
 
+CLOSE='close'
+PING='ping'
 
 def split_multiple_messages(data):
     messages = data.split("^")
     messages = filter(None, messages)
     return messages
 
-def determine_message_is_ping(message):
-    return message=="ping"
 
-def parse_message(data):
-    message = data.split("|")
+def message_is_close(message):
+    return message==CLOSE
+
+def message_is_ping(message):
+    return message==PING
+
+def parse_message(single_message):
+    message = single_message.split("|")
+    if len(message) == 1:
+        if message_is_ping(message[0]):
+            return PING
+        if message_is_close(message[0]):
+            return CLOSE
+        # TODO: logging instead. do not break.. handle this
+        raise Exception('unknown message received: {}'.format(single_message))
     slabel = message[0]
     height = int(message[1])
     width = int(message[2])
@@ -31,17 +44,34 @@ class SickClient:
         self.exit = False
         self.BUFFER_SIZE = 1024
 
+    def checks(self):
+        self.mc.set("memcache_up", "true")
+        assert self.mc.get("memcache_up")=="true" ,"memcache is down"
+
     def connect(self):
         TCP_IP = '127.0.0.1'
         TCP_PORT = 5005
         MESSAGE = "lets talk"
         self.s.connect((TCP_IP, TCP_PORT))
         self.s.send(MESSAGE)
+        self.checks()
 
-    def update_wms(self, message):
-        #will get decorator for cache key checking
+    def set_memcache_key(self, message):
         if not self.mc.get(message['slabel']):
             self.mc.set(message['slabel'], 'processed')
+            return True
+        else:
+            return False
+
+    def act_on_message_types(self, message):
+        '''
+            logic to decide what to do on different message types
+        '''
+        if message_is_ping(message):
+            print("got your ping")
+        elif message_is_close(message):
+            self.kill()
+        elif self.set_memcache_key(message):
             do_something(message)
         else:
             print("doubled slabel message {}".format(message['slabel']))
@@ -50,15 +80,14 @@ class SickClient:
         while not self.exit:
             data = self.s.recv(self.BUFFER_SIZE)
             if data:
-                time.sleep(2)
+                time.sleep(0.2)
                 print("received comms: {}".format(data))
 
                 messages = split_multiple_messages(data)
                 al = map(parse_message, messages)
-                map(self.update_wms, map(parse_message, messages))
+                map(self.act_on_message_types, al)
                 # split_multiple_messages
                 # parse_message
-                # update_wms()
             else:
                 self.kill()
             # messages=parse_message(data)
