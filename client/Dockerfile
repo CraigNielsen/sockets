@@ -1,4 +1,5 @@
-FROM debian:jessie
+#FROM debian:jessie
+FROM debian:jessie-slim
 
 
 # Use fast mirrors
@@ -64,10 +65,12 @@ RUN chown -R craig:craig .vim
 COPY requirements.txt sockets/requirements.txt
 RUN pip install -r sockets/requirements.txt
 
-WORKDIR /client
+WORKDIR /home/craig
 COPY tests/ tests/
 CMD ls
-COPY client.py client.py
+COPY *.py ./
 
 #CMD ls -R
+
+WORKDIR /home/craig
 CMD pytest

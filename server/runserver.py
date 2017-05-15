@@ -1,5 +1,6 @@
-from testing_config import messages as test_messages
+# from testing_config import messages as test_messages
 from server import TestingTCPThreadedServer, RandomTCPThreadedServer
+from ..testing.helper import generate_messages
 
 if __name__ == "__main__":
     while True:
@@ -10,6 +11,7 @@ if __name__ == "__main__":
             break
         except ValueError:
             pass
-    print("running Random Threaded Server")
+    # print("running Random Threaded Server")
     # RandomTCPThreadedServer('', port_num).listen()
-    TestingTCPThreadedServer('',port_num, test_messages, 2).listen()
+    print("running Testing Threaded Server")
+    TestingTCPThreadedServer('',port_num, generate_messages(5000,6000), 100).listen()

@@ -8,18 +8,25 @@ CLOSE='close'
 PING='ping'
 
 def split_multiple_messages(data):
+    assert type(data) == str
     messages = data.split("^")
     messages = filter(None, messages)
     return messages
 
+def pipe(data, functions):
+    assert type(data)==list
+    return reduce(lambda a, c: map(c, a), functions, data)
 
 def message_is_close(message):
+    assert type(message)==str
     return message==CLOSE
 
 def message_is_ping(message):
+    assert type(message)==str
     return message==PING
 
 def parse_message(single_message):
+    assert type(single_message)==str
     message = single_message.split("|")
     if len(message) == 1:
         if message_is_ping(message[0]):
@@ -27,7 +34,7 @@ def parse_message(single_message):
         if message_is_close(message[0]):
             return CLOSE
         # TODO: logging instead. do not break.. handle this
-        raise Exception('unknown message received: {}'.format(single_message))
+        raise Exception('Client.py :unknown message received: {}'.format(single_message))
     slabel = message[0]
     height = int(message[1])
     width = int(message[2])
@@ -42,7 +49,7 @@ class SickClient:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         self.exit = False
-        self.BUFFER_SIZE = 1024
+        self.BUFFER_SIZE = 2048
 
     def checks(self):
         self.mc.set("memcache_up", "true")
@@ -63,14 +70,15 @@ class SickClient:
         else:
             return False
 
-    def act_on_message_types(self, message):
+    def act_on_message(self, message):
         '''
             logic to decide what to do on different message types
         '''
-        if message_is_ping(message):
-            print("got your ping")
-        elif message_is_close(message):
-            self.kill()
+        if type(message)==str :
+            if message_is_ping(message):
+                print("got your ping")
+            elif message_is_close(message):
+                self.kill()
         elif self.set_memcache_key(message):
             do_something(message)
         else:
@@ -80,14 +88,14 @@ class SickClient:
         while not self.exit:
             data = self.s.recv(self.BUFFER_SIZE)
             if data:
-                time.sleep(0.2)
                 print("received comms: {}".format(data))
-
+                # pipe(data, [split_multiple_messages,
+                            # parse_message,
+                            # self.act_on_message,
+                # ])
                 messages = split_multiple_messages(data)
-                al = map(parse_message, messages)
-                map(self.act_on_message_types, al)
-                # split_multiple_messages
-                # parse_message
+                all_parsed_messages = map(parse_message, messages)
+                map(self.act_on_message, all_parsed_messages)
             else:
                 self.kill()
             # messages=parse_message(data)

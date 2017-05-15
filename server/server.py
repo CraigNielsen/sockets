@@ -21,8 +21,8 @@ def get_random_ship_message():
     id_part=int(math.floor(random.random()*100000))
     width=30
     height=50
-    if should_send_many():
-        return '^{}^'.format(CLOSE)
+    # if should_send_many():
+        # return '^{}^'.format(CLOSE)
     return '^{}|{}|{}^'.format(id_part,width,height)
 
 class RandomTCPThreadedServer(object):
@@ -69,13 +69,27 @@ class TestingTCPThreadedServer(RandomTCPThreadedServer):
         super(TestingTCPThreadedServer, self).__init__(host, port)
         self.messages = messages
         self.load = load
+        self.repeat = False
+        self.current_message = None
 
     def listen(self):
         self.sock.listen(5)
         while True:
             client, address = self.sock.accept()
+            print("connection from: ", address)
             client.settimeout(60)
             threading.Thread(target = self.listenToClient,args = (client,address)).start()
+
+    def get_message(self):
+        if not self.messages:
+            return None
+        self.repeat = not self.repeat
+        if self.repeat:
+            message = self.messages.pop(0)
+            self.current_message = message
+            return message
+        message=self.current_message
+        return message
 
     def listenToClient(self, client, address):
         size = 1024
@@ -83,19 +97,22 @@ class TestingTCPThreadedServer(RandomTCPThreadedServer):
             try:
                 data = client.recv(size)
                 if data:
-                    print("connection from: ", address)
                     while True:
-                        if not self.messages:
+                        message=self.get_message()
+                        if not message:
                             client.send('^close^')
+                            print("sent everything")
+                            raise Exception("ending")
                             #TODO: exit elegantly
-                            sys.exit()
-                        message=self.messages.pop(0)
+                            # sys.exit()
                         print("about to send, {}".format(message))
                         client.send(message)
-                        time.sleep(1/self.load)
+                        time.sleep(1.0/self.load)
                 else:
                     raise Exception('Client disconnected')
             except:
-                client.close()
+                print("failing now")
+                time.sleep(10)
+                # client.close()
                 return False
 

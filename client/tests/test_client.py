@@ -4,8 +4,9 @@ import time
 import threading
 from testing_config import messages
 from mock import patch, Mock
+from ...testing.helper import generate_messages
 from .. import client
-from ..client import parse_message, split_multiple_messages, SickClient, CLOSE, PING, do_something
+from ..client import parse_message, split_multiple_messages, SickClient, CLOSE, PING, do_something, pipe
 # from sockets.server.server import TestingTCPThreadedServer
 
 # These tests are all the same.
@@ -63,19 +64,25 @@ class TestSickClient(TestCase):
 
     @patch(client.__name__ + '.do_something', return_value=True)
     def test_sick_client_setup(self, ds):
-        # with patch.object(SickClient, 'act_on_message_types', wraps=sc.act_on_message_types) as fun:
             sc = SickClient()
             #mock message act on message type function
-            # sc2 = SickClient()
+            sc2 = SickClient()
             sc.connect()
             # sc2.connect()
+            # threading.Thread(target = sc.start_comms).start()
             sc.start_comms()
-            from mock import  call
-            self.assertEquals(len(ds.mock_calls), 3)
-            ds.assert_has_calls([
-                call({'width': 50, 'slabel': '51259', 'height': 30}),
-                call({'width': 50, 'slabel': '42337', 'height': 30}),
-                call({'width': 50, 'slabel': '25907', 'height': 30}),
-            ])
-
+            # threading.Thread(target = sc2.start_comms).start()
+            # sc2.start_comms()
+            calls = []
+            many_messages = generate_messages(5000, 6000)
+            from mock import call
+            for message in many_messages:
+                all_messages_after_split = split_multiple_messages(message)
+                formatted_messages = map(parse_message, all_messages_after_split)
+                for message in formatted_messages:
+                    calls.append(call(message))
+            self.assertEquals(len(ds.mock_calls), 1000)
+            ds.assert_has_calls(
+                calls
+            )
 

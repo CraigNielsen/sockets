@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: wms-testing
+  labels:
+    service: wms-testing
+spec:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+  selector:
+    service: wms-testing

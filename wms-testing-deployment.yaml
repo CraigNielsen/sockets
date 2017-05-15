@@ -1,0 +1,35 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: wms-testing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        service: wms-testing
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: server
+          image: sentientcode/sockets_server
+          #imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          command:
+          - python runserver.py
+        - name: memcache
+          image: memcached
+          #imagePullPolicy: Always
+          ports:
+            - containerPort: 11211
+              protocol: TCP
+        - name: client
+          image: sentientcode/sockets_client
+          #imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          command:
+          - pytest
